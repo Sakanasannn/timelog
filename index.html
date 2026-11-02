@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f7f4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="时刻">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>时刻 · TimeLog</title>
+<style>
+:root{--bg:#f7f7f4;--card:#fff;--ink:#20231f;--muted:#858a82;--line:#e9ebe5;--accent:#496d5a;--accent-soft:#e9f0eb;--danger:#b64d4d;--shadow:0 8px 28px rgba(35,45,35,.055)}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit} button{cursor:pointer}
+.app{max-width:520px;margin:0 auto;min-height:100svh;padding:calc(18px + env(safe-area-inset-top)) 18px calc(30px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 22px}
+.brand{font-size:22px;font-weight:750;letter-spacing:-.7px}.brand span{color:var(--accent)}
+.header-note{font-size:12px;color:var(--muted)}
+.card{background:var(--card);border:1px solid rgba(30,40,30,.035);border-radius:22px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+h2{font-size:15px;margin:0;font-weight:700} .sub{font-size:12px;color:var(--muted)}
+.clock{font-size:42px;letter-spacing:-1.8px;font-weight:650;font-variant-numeric:tabular-nums;margin:4px 0 2px}
+.date{font-size:12px;color:var(--muted)}
+.field-label{font-size:12px;color:var(--muted);display:block;margin:18px 0 8px}
+.category-row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;color:#5d625b;font-size:13px}
+.chip.active{background:var(--accent-soft);border-color:#d6e4d9;color:var(--accent);font-weight:650}
+.primary{width:100%;border:0;border-radius:15px;background:var(--accent);color:#fff;font-weight:700;padding:15px;margin-top:16px;box-shadow:0 5px 12px rgba(73,109,90,.17)}
+.primary:active{transform:scale(.99);opacity:.92}
+.week-nav{display:flex;align-items:center;gap:10px}
+.icon-btn{width:32px;height:32px;border:1px solid var(--line);border-radius:50%;background:#fff;color:#52584f;font-size:17px}
+.week-label{font-size:12px;color:var(--muted);min-width:100px;text-align:center}
+.chart-wrap{width:100%;overflow:hidden}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.legend span{font-size:11px;color:#737970;display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.empty-chart{padding:35px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.7}
+.record{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f1ed}
+.record:last-child{border-bottom:0;padding-bottom:0}
+.record:first-child{padding-top:0}
+.record-mark{width:9px;height:9px;border-radius:50%;flex:none}
+.record-main{min-width:0;flex:1}.record-name{font-size:14px;font-weight:650}.record-date{font-size:11px;color:var(--muted);margin-top:3px}
+.record-time{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums}
+.record-actions{display:flex;gap:4px}.small-btn{border:0;background:transparent;color:#969b93;padding:7px;font-size:12px}
+.empty-list{text-align:center;color:var(--muted);padding:24px 0;font-size:13px}
+.footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px;padding:5px 4px 0}
+.link-btn{border:0;background:transparent;color:var(--accent);font-size:12px;padding:5px}
+.modal-back{position:fixed;inset:0;background:rgba(20,25,20,.28);display:none;align-items:flex-end;justify-content:center;padding:14px;z-index:5}
+.modal-back.show{display:flex}.modal{background:#fff;border-radius:22px;padding:20px;width:min(100%,480px);box-shadow:var(--shadow)}
+.modal h3{margin:0 0 15px;font-size:17px}.modal input,.modal select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);margin:6px 0 12px}
+.modal-actions{display:flex;gap:8px}.modal-actions button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:#fff}.modal-actions .save{background:var(--accent);color:#fff;border-color:var(--accent)}
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#252b26;color:white;padding:10px 15px;border-radius:999px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;white-space:nowrap}.toast.show{opacity:1}
+@media(min-width:600px){.app{padding-top:32px}.modal-back{align-items:center}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand">时刻<span>.</span></div><div class="header-note">TIMELOG · 本地时间记录</div></header>
+<section class="card">
+  <div class="section-head"><h2>快速打卡</h2><span class="sub">点击即记录当前时间</span></div>
+  <div class="clock" id="clock">--:--:--</div><div class="date" id="today"></div>
+  <label class="field-label">选择要记录的事件</label>
+  <div class="category-row" id="categories"></div>
+  <button class="primary" id="logBtn">＋ 记录此刻</button>
+</section>
+<section class="card">
+  <div class="section-head"><h2>时间趋势</h2><div class="week-nav"><button class="icon-btn" id="prevWeek" aria-label="上一周">‹</button><span class="week-label" id="weekLabel">本周</span><button class="icon-btn" id="nextWeek" aria-label="下一周">›</button></div></div>
+  <div class="sub" style="margin:-5px 0 10px">横轴为日期 · 纵轴为一天中的时刻</div>
+  <div class="chart-wrap" id="chart"><div class="empty-chart">还没有记录。完成第一次打卡后，<br>这里就会出现你的时间折线图。</div></div>
+  <div class="legend" id="legend"></div>
+</section>
+<section class="card">
+  <div class="section-head"><h2>最近记录</h2><span class="sub" id="recordCount">0 条</span></div>
+  <div id="records"><div class="empty-list">还没有打卡记录</div></div>
+</section>
+<div class="footer"><span>数据仅保存在此设备的浏览器中</span><span><button class="link-btn" id="manageBtn">管理分类</button><button class="link-btn" id="exportBtn">导出备份</button></span></div>
+</div>
+<div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+(()=>{
+const KEY='timelog_v1';
+const palette=['#557b67','#d39a54','#7188b5','#b77c91','#8c82b5','#7b9999','#b17d55','#89966a'];
+let data=load(), selected=data.categories[0]?.id||'sleep', weekOffset=0;
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.categories)&&Array.isArray(x.records))return x}catch(e){}return{categories:[{id:'sleep',name:'睡觉',color:palette[0]},{id:'wake',name:'起床',color:palette[1]},{id:'study',name:'学习',color:palette[2]}],records:[]}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function pad(n){return String(n).padStart(2,'0')}
+function dateKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function parseDate(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function fmtDate(d){return `${d.getMonth()+1}月${d.getDate()}日`}
+function timeOf(r){const d=new Date(r.ts);return d.getHours()+d.getMinutes()/60+d.getSeconds()/3600}
+function fmtTime(ts,seconds=false){const d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes())+(seconds?':'+pad(d.getSeconds()):'')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(s){const el=document.getElementById('toast');el.textContent=s;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1700)}
+function startOfWeek(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function weekDates(){const s=startOfWeek(new Date());s.setDate(s.getDate()+weekOffset*7);return Array.from({length:7},(_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d})}
+function renderClock(){const d=new Date();document.getElementById('clock').textContent=fmtTime(d.getTime(),true);document.getElementById('today').textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 · '+['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]}
+function renderCategories(){document.getElementById('categories').innerHTML=data.categories.map(c=>`<button class="chip ${c.id===selected?'active':''}" data-id="${esc(c.id)}">${esc(c.name)}</button>`).join('')+`<button class="chip" id="addCat">＋</button>`;document.querySelectorAll('.chip[data-id]').forEach(b=>b.onclick=()=>{selected=b.dataset.id;renderCategories()});document.getElementById('addCat').onclick=()=>categoryModal()}
+function logNow(){if(!data.categories.some(c=>c.id===selected)){toast('请先选择一个分类');return}data.records.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),cat:selected,ts:Date.now()});save();render();toast('已记录 '+fmtTime(Date.now(),true))}
+function chartSVG(){
+ const dates=weekDates(), start=dateKey(dates[0]),end=dateKey(dates[6]);
+ const cats=data.categories, recs=data.records.filter(r=>{const k=dateKey(new Date(r.ts));return k>=start&&k<=end});
+ document.getElementById('weekLabel').textContent=weekOffset===0?'本周':`${fmtDate(dates[0])}–${fmtDate(dates[6])}`;
+ if(!recs.length){document.getElementById('chart').innerHTML='<div class="empty-chart">这周还没有记录。<br>选择上方分类并点击「记录此刻」。</div>';document.getElementById('legend').innerHTML='';return}
+ // Find the largest empty arc on a 24-hour clock, then unwrap times across midnight.
+ const vals=recs.map(r=>((timeOf(r)%24)+24)%24).sort((a,b)=>a-b);
+ let gap=-1,cut=0;
+ for(let i=0;i<vals.length;i++){const a=vals[i],b=i===vals.length-1?vals[0]+24:vals[i+1];if(b-a>gap){gap=b-a;cut=((a+b)/2)%24}}
+ const unwrap=t=>{let v=t;if(v<cut)v+=24;return v};
+ const ys=recs.map(r=>unwrap(timeOf(r)));
+ let ymin=Math.floor(Math.min(...ys)-1),ymax=Math.ceil(Math.max(...ys)+1);
+ if(ymax-ymin<4){const mid=(ymax+ymin)/2;ymin=Math.floor(mid-2);ymax=ymin+4}
+ ymin=Math.max(cut-1,ymin);ymax=Math.min(cut+25,ymax);
+ const W=340,H=218,L=43,R=12,T=10,B=30, pw=W-L-R,ph=H-T-B;
+ const x=i=>L+(i/6)*pw, y=v=>T+(ymax-v)/(ymax-ymin)*ph;
+ const ticks=4, grid=Array.from({length:ticks+1},(_,i)=>ymin+(ymax-ymin)*i/ticks);
+ let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="本周打卡时间折线图">`;
+ grid.forEach(v=>{let yy=y(v);let h=Math.round(v*60)%1440;svg+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#edf0eb" stroke-width="1"/><text x="${L-7}" y="${yy+3.5}" text-anchor="end" fill="#92988f" font-size="9">${pad(Math.floor(h/60)%24)}:${pad(h%60)}</text>`});
+ dates.forEach((d,i)=>{svg+=`<text x="${x(i)}" y="${H-9}" text-anchor="middle" fill="#92988f" font-size="9">${['日','一','二','三','四','五','六'][d.getDay()]}</text>`});
+ cats.forEach(c=>{
+  const pts=recs.filter(r=>r.cat===c.id).map(r=>({r,day:dates.findIndex(d=>dateKey(d)===dateKey(new Date(r.ts))),v:unwrap(timeOf(r))})).filter(p=>p.day>=0).sort((a,b)=>a.day-b.day||a.r.ts-b.r.ts);
+  if(!pts.length)return;
+  const line=pts.map(p=>`${x(p.day)},${y(p.v)}`).join(' ');
+  if(pts.length>1)svg+=`<polyline points="${line}" fill="none" stroke="${c.color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  pts.forEach(p=>{svg+=`<circle cx="${x(p.day)}" cy="${y(p.v)}" r="4" fill="${c.color}" stroke="#fff" stroke-width="1.5"><title>${esc(c.name)} ${fmtTime(p.r.ts)}</title></circle>`});
+ });
+ svg+='</svg>';document.getElementById('chart').innerHTML=svg;
+ document.getElementById('legend').innerHTML=cats.filter(c=>recs.some(r=>r.cat===c.id)).map(c=>`<span><i class="dot" style="background:${c.color}"></i>${esc(c.name)}</span>`).join('');
+}
+function renderRecords(){const list=[...data.records].sort((a,b)=>b.ts-a.ts).slice(0,30);document.getElementById('recordCount').textContent=data.records.length+' 条';document.getElementById('records').innerHTML=list.length?list.map(r=>{const c=data.categories.find(c=>c.id===r.cat)||{name:'已删除分类',color:'#aaa'};const d=new Date(r.ts);return `<div class="record"><i class="record-mark" style="background:${c.color}"></i><div class="record-main"><div class="record-name">${esc(c.name)}</div><div class="record-date">${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}</div></div><div class="record-time">${fmtTime(r.ts,true)}</div><div class="record-actions"><button class="small-btn" data-edit="${r.id}">编辑</button><button class="small-btn" data-del="${r.id}">删除</button></div></div>`}).join(''):'<div class="empty-list">还没有打卡记录</div>';
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('删除这条记录？')){data.records=data.records.filter(r=>r.id!==b.dataset.del);save();render()}});document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editModal(b.dataset.edit))}
+function render(){renderCategories();chartSVG();renderRecords()}
+function showModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('modalBack').classList.add('show')}
+function closeModal(){document.getElementById('modalBack').classList.remove('show')}
+document.getElementById('modalBack').onclick=e=>{if(e.target.id==='modalBack')closeModal()}
+function categoryModal(){showModal(`<h3>添加记录分类</h3><label class="sub">分类名称</label><input id="catName" maxlength="16" placeholder="例如：运动、吃饭、喝水"><div class="modal-actions"><button id="cancel">取消</button><button class="save" id="saveCat">添加分类</button></div>`);document.getElementById('cancel').onclick=closeModal;document.getElementById('saveCat').onclick=()=>{const name=document.getElementById('catName').value.trim();if(!name)return toast('请输入分类名称');const c={id:'c'+Date.now(),name,color:palette[data.categories.length%palette.length]};data.categories.push(c);selected=c.id;save();closeModal();render()}}
+function editModal(id){const r=data.records.find(x=>x.id===id);if(!r)return;const d=new Date(r.ts);const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);showModal(`<h3>编辑记录</h3><label class="sub">分类</label><select id="editCat">${data.categories.map(c=>`<option value="${c.id}" ${c.id===r.cat?'selected':''}>${esc(c.name)}</option>`).join('')}</select><label class="sub">日期和时间</label><input id="editDate" type="datetime-local" value="${local}"><div class="modal-actions"><button id="cancel">取消</button><button class="save" id="saveEdit">保存修改</button></div>`);document.getElementById('cancel').onclick=closeModal;document.getElementById('saveEdit').onclick=()=>{const t=new Date(document.getElementById('editDate').value).getTime();if(!Number.isFinite(t))return toast('日期时间无效');r.ts=t;r.cat=document.getElementById('editCat').value;save();closeModal();render()}}
+function manageModal(){showModal(`<h3>管理分类</h3><div id="catManage">${data.categories.map(c=>`<div class="record"><i class="record-mark" style="background:${c.color}"></i><div class="record-main">${esc(c.name)}</div><button class="small-btn" data-rename="${c.id}">改名</button><button class="small-btn" data-remove="${c.id}">删除</button></div>`).join('')}</div><div class="modal-actions" style="margin-top:16px"><button id="closeManage">完成</button><button class="save" id="newManage">＋ 添加分类</button></div>`);document.getElementById('closeManage').onclick=closeModal;document.getElementById('newManage').onclick=categoryModal;document.querySelectorAll('[data-rename]').forEach(b=>b.onclick=()=>{const c=data.categories.find(x=>x.id===b.dataset.rename);const n=prompt('分类新名称',c.name);if(n&&n.trim()){c.name=n.trim();save();manageModal();render()}});document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{if(data.categories.length===1)return alert('至少保留一个分类');const id=b.dataset.remove;if(!confirm('删除分类及其所有打卡记录？'))return;data.categories=data.categories.filter(c=>c.id!==id);data.records=data.records.filter(r=>r.cat!==id);if(selected===id)selected=data.categories[0].id;save();manageModal();render()})}
+document.getElementById('logBtn').onclick=logNow;
+document.getElementById('prevWeek').onclick=()=>{weekOffset--;chartSVG()};
+document.getElementById('nextWeek').onclick=()=>{if(weekOffset<0)weekOffset++;chartSVG()};
+document.getElementById('manageBtn').onclick=manageModal;
+document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='timelog-backup-'+dateKey(new Date())+'.json';a.click();URL.revokeObjectURL(a.href);toast('备份文件已导出')};
+render();renderClock();setInterval(renderClock,1000);
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('离线缓存注册失败', err));
+  });
+}
+})();
+</script>
+</body>
+</html>

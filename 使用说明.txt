@@ -1,0 +1,18 @@
+时刻 · TimeLog PWA 部署包
+
+文件：
+- index.html：打卡网页
+- manifest.webmanifest：添加到主屏幕配置
+- sw.js：离线缓存
+- icon-192.png / icon-512.png：应用图标
+
+部署：
+1. 将整个文件夹中的 5 个文件上传到支持静态网站的 HTTPS 托管服务（例如 Netlify、Cloudflare Pages 或 GitHub Pages）。
+2. 上传完成后，打开服务提供的 https://... 网站地址。
+3. iPhone 用 Safari 打开该地址，点分享按钮 →「添加到主屏幕」。
+4. 从主屏幕图标启动，即可按独立 App 样式使用。
+
+注意：
+- 必须通过 HTTPS 网站地址访问；直接在「文件」App 打开 index.html 不支持 PWA。
+- 打卡数据保存在该网站地址对应的浏览器本地存储中。不要清除 Safari 网站数据；更换域名/托管地址时先用「导出备份」保存 JSON。
+- 本包没有自动上传到互联网；需要你选择一个托管服务并上传文件。
